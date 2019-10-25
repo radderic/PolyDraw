@@ -33,8 +33,8 @@ let setup = () => {
     xctx.stroke();
 
     yctx.strokeStyle = '#ffffff';
-    yctx.moveTo(0, yCanvas.height/2);
-    yctx.lineTo(yCanvas.width, yCanvas.height/2);
+    yctx.moveTo(0, yCanvas.height-100);
+    yctx.lineTo(yCanvas.width, yCanvas.height-100);
     yctx.stroke();
     yctx.moveTo(100, 0);
     yctx.lineTo(100, yCanvas.height);
@@ -42,16 +42,16 @@ let setup = () => {
 
     let ratio = 100;
     for(let i = 2; i*ratio < drawCanvas.width; i++) {
-        dctx.moveTo(i*100, (drawCanvas.height/2) - 20);
-        dctx.lineTo(i*100, (drawCanvas.height/2) + 20);
+        dctx.moveTo(i*ratio, (drawCanvas.height/2) - 20);
+        dctx.lineTo(i*ratio, (drawCanvas.height/2) + 20);
         dctx.stroke();
 
-        xctx.moveTo(i*100, (xCanvas.height/2) - 20);
-        xctx.lineTo(i*100, (xCanvas.height/2) + 20);
+        xctx.moveTo(i*ratio, (xCanvas.height/2) - 20);
+        xctx.lineTo(i*ratio, (xCanvas.height/2) + 20);
         xctx.stroke();
 
-        yctx.moveTo(i*100, (yCanvas.height/2) - 20);
-        yctx.lineTo(i*100, (yCanvas.height/2) + 20);
+        yctx.moveTo(i*ratio, yCanvas.height - 100 - 20);
+        yctx.lineTo(i*ratio, yCanvas.height - 100 + 20);
         yctx.stroke();
 
     }
@@ -90,7 +90,7 @@ function getMousePos(drawCanvas, evt) {
 }
 
 let translate = (x) => {
-    return drawCanvas.width/2 - x + 100;
+    return drawCanvas.width - x;
 }
 
 let getTime = () => {
@@ -98,26 +98,40 @@ let getTime = () => {
     return time - startTime;
 }
 
+let prevx = 0;
+let prevy = 0;
+
 let drawPoint = (ctx, x, y, color) => {
     let rectsize = 10;
-    let xoff = 8;
-    let yoff = 8;
     ctx.fillStyle = color;
-    ctx.fillRect(x-xoff, y-yoff, rectsize, rectsize);
+    ctx.fillRect(x, y, rectsize, rectsize);
     //console.log(`point at: x:${x} y:${y}`);
+}
+
+let stroke = (ctx, x, y, color) => {
+    ctx.strokeStyle = '#ffffff';
+    ctx.moveTo(prevx, prevy);
+    ctx.lineTo(x, y);
+    ctx.stroke();
 }
 
 drawCanvas.addEventListener('mousedown', (evt) => {
     var rect = drawCanvas.getBoundingClientRect();
     //let x = (evt.clientX - rect.left - 100) / 100;
     //let y = (evt.clientY - rect.top - drawCanvas.height/2 ) * -1;
-    let x = evt.clientX - rect.left;
-    let y = evt.clientY - rect.top;
+    let xoff = 8;
+    let yoff = 8;
+    let x = evt.clientX - rect.left - xoff;
+    let y = evt.clientY - rect.top - yoff;
+
     let t = getTime();
     drawPoint(dctx, x, y, "#ff0000");
+    stroke(dctx, x, y, "#ffff00");
     t = (t/30 % 700)+100;
     drawPoint(xctx, t, y, "#00ff00");
     drawPoint(yctx, t, translate(x), "#0000ff");
+    prevx = x;
+    prevy = y;
 });
 
 drawCanvas.addEventListener('mousemove', function(evt) {
